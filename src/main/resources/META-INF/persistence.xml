@@ -7,7 +7,7 @@
 
     <persistence-unit name="produtoPU">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>com.produtoapi.model.Produto</class>
+        <class>com.produtoapi.model.Animais</class>
 
         <properties>
             <!-- Banco H2 -->
