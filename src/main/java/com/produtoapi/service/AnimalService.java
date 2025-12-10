@@ -14,48 +14,53 @@ public class AnimalService {
     @Autowired
     private AnimaisRepository animaisRepository;
 
-    public List<Animais> listarTodos(){
+    public List<Animais> listarTodos() {
         return animaisRepository.findAll();
     }
 
-    public Animais salvar(Animais animais){
-
+    public Animais salvar(Animais animais) {
         return animaisRepository.save(animais);
     }
 
-    public Animais atualizar(Long id, Animais animais){
+    public Animais atualizar(Long id, Animais animais) {
         Animais existente = animaisRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Animal não encontrado"));
+
         existente.setNome(animais.getNome());
         existente.setIdade(animais.getIdade());
         existente.setAdocao(animais.getAdocao());
         existente.setChip(animais.getChip());
+
         return animaisRepository.save(existente);
     }
 
-    public void deletar(Long id){
+    public void deletar(Long id) {
+        if (!animaisRepository.existsById(id)) {
+            throw new RuntimeException("Animal não encontrado");
+        }
         animaisRepository.deleteById(id);
     }
 
-    public Optional<Animais> findById(Long id){
+    public Optional<Animais> findById(Long id) {
         return animaisRepository.findById(id);
     }
 
-    public Animais atualizarParcialmente(Long id, Animais animaisParcial) {
-        Animais animaisExistente = findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+    public Animais atualizarParcialmente(Long id, Animais parcial) {
+        Animais existente = animaisRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Animal não encontrado"));
 
-        if (animaisParcial.getNome() != null) {
-            animaisExistente.setNome(animaisParcial.getNome());
-        }
+        if (parcial.getNome() != null)
+            existente.setNome(parcial.getNome());
 
-        if (animaisParcial.getAdocao() != null) {
-            animaisExistente.setAdocao(animaisParcial.getAdocao());
-        }
+        if (parcial.getIdade() != null)
+            existente.setIdade(parcial.getIdade());
 
-        // Continue com os outros campos
+        if (parcial.getAdocao() != null)
+            existente.setAdocao(parcial.getAdocao());
 
-        return animaisRepository.save(animaisExistente);
+        if (parcial.getChip() != null)
+            existente.setChip(parcial.getChip());
+
+        return animaisRepository.save(existente);
     }
-
 }

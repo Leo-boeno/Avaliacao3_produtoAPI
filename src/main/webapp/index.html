@@ -1,45 +1,58 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width">
-    <title>Title</title>
+    <meta charset="utf-8">
+    <title>ONG Coração de Patas</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Cadastro de Produtos</h1>
 
-    <div>
-        <label for="id">ID:</label>
-        <input type="text" id="id">
-    </div>
-    <div>
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome">
-    </div>
-    <div>
-        <label for="preco">Preço:</label>
-        <input type="text" id="preco">
-    </div>
-    <div>
-        <label for="quantidade">Quantidade:</label>
-        <input type="text" id="quantidade">
-    </div>
-    <div>
-        <label for="status">Status:</label>
-        <input type="text" id="status">
+<header class="topbar">
+    <img src="logo.png" alt="Logo da ONG Coração de Patas" class="logo">
+    <h1>ONG Coração de Patas</h1>
+</header>
+
+<div class="container">
+
+    <h2 class="section-title">Cadastro de Animais</h2>
+
+    <form id="animalForm" class="card">
+        <input type="hidden" id="animalId">
+
+        <label>Nome</label>
+        <input id="nome" required>
+
+        <label>Idade</label>
+        <input id="idade" type="number" min="0">
+
+        <label>Adotável?</label>
+        <select id="adocao">
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+        </select>
+
+        <label>Chip</label>
+        <input id="chip">
+
+        <div class="buttons">
+            <button type="submit" class="btn-primary">Salvar</button>
+            <button type="button" id="limpar" class="btn-secondary">Limpar</button>
+        </div>
+    </form>
+
+    <h2 class="section-title">Animais Cadastrados</h2>
+
+    <div class="card">
+        <table id="tabela">
+            <thead>
+            <tr><th>ID</th><th>Nome</th><th>Idade</th><th>Adocao</th><th>Chip</th><th>Ações</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 
-    <button onclick="salvar()" class="salvar">Salvar</button>
-    <button onclick="atualizar()" class="atualizar">Atualizar</button>
-    <button onclick="deletar()" class="deletar">Deletar</button>
-    <button onclick="consultar()" class="consultar">Consultar</button>
-    <button onclick="limparCampos()" class="limparCampos">Limpar Campos</button>
+</div>
 
-    <h2>Lista de Produtos</h2>
-    <ul id="lista-produtos"></ul>
-    <p id="total-produtos" onload="getProdutoFromForm()"></p>
-
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

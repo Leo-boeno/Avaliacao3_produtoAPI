@@ -1,60 +1,60 @@
 package com.produtoapi.controller;
 
 import com.produtoapi.model.Animais;
-import com.produtoapi.repository.AnimaisRepository;
 import com.produtoapi.service.AnimalService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/produtos")
+@RequestMapping("/animais")
 public class AnimaisController {
 
     @Autowired
     private AnimalService animalService;
 
-    @Autowired
-    private AnimaisRepository animaisRepository;
-
-
     @GetMapping
-    public List<Animais> listarTodos(){
-        return animalService.listarTodos();
-    }
-
-    @PostMapping
-    public Animais salvar(@RequestBody Animais animais){
-        return animalService.salvar(animais);
-    }
-
-    @PutMapping("/{id}")
-    public Animais atualizar(@PathVariable Long id, @RequestBody Animais animais){
-        if (!animaisRepository.existsById(id)) {
-            throw new RuntimeException("Produto não encontrado com ID: " + id);
-        }
-
-        // Define o ID corretamente (caso não venha no corpo)
-        animais.setId(id);
-
-        return animaisRepository.save(animais);
-    }
-
-    @PatchMapping("/{id}")
-    public Animais atualizarParcialmente(@PathVariable Long id, @RequestBody Animais animaisParcial) {
-        return animalService.atualizarParcialmente(id, animaisParcial);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id){
-        animalService.deletar(id);
+    public ResponseEntity<List<Animais>> listarTodos(){
+        return ResponseEntity.ok(animalService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public Optional<Animais> findById(@PathVariable Long id){
-        return animalService.findById(id);
+    public ResponseEntity<Animais> buscarPorId(@PathVariable Long id){
+        Animais animal = animalService.findById(id)
+                .orElse(null);
+
+        if (animal == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(animal);
+    }
+
+    @PostMapping
+    public ResponseEntity<Animais> salvar(@Valid @RequestBody Animais animais){
+        Animais salvo = animalService.salvar(animais);
+        return ResponseEntity.ok(salvo);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Animais> atualizar(@PathVariable Long id, @Valid @RequestBody Animais animais){
+        Animais atualizado = animalService.atualizar(id, animais);
+        return ResponseEntity.ok(atualizado);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Animais> atualizarParcialmente(@PathVariable Long id, @RequestBody Animais animaisParcial){
+        Animais atualizado = animalService.atualizarParcialmente(id, animaisParcial);
+        return ResponseEntity.ok(atualizado);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id){
+        animalService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,101 +1,101 @@
- const BASE_URL = 'http://localhost:8080/produtos'; // URL base da API
+const API = '/animais';
 
-        // Função para Coletar Dados do Formulário
-        function getProdutoFromForm() {
-            const nome = document.getElementById('nome').value;
-            const preco = document.getElementById('preco').value;
-            const quantidade = document.getElementById('quantidade').value;
-            const status = document.getElementById('status').value;
-            return { nome, preco: parseFloat(preco), quantidade: parseInt(quantidade), status };
-        }
+async function listar() {
+  const res = await fetch(API);
+  const dados = await res.json();
+  const tbody = document.querySelector('#tabela tbody');
+  tbody.innerHTML = '';
 
-        async function listarTodos() {
-            const response = await fetch(BASE_URL);
-            const produtos = await response.json();
-            const lista = document.getElementById('lista-produtos');
-            const total = document.getElementById('total-produtos');
-            lista.innerHTML = '';
-            produtos.forEach(produto => {
-                const item = document.createElement('li');
-                item.textContent = `ID: ${produto.id}, Nome: ${produto.nome}, Preço: ${produto.preco}, Quantidade: ${produto.quantidade}, Status: ${produto.status}`;
-                lista.appendChild(item);
-            });
-            total.textContent = `Total de produtos: ${produtos.length}`;
-        }
+  dados.forEach(a => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${a.id}</td>
+      <td>${a.nome}</td>
+      <td>${a.idade ?? ''}</td>
+      <td>${a.adocao}</td>
+      <td>${a.chip ?? ''}</td>
+      <td class="actions">
+        <button onclick="editar(${a.id})">Editar</button>
+        <button class="delete" onclick="remover(${a.id})">Excluir</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
 
-        async function salvar() {
-            const produto = getProdutoFromForm();
-            await fetch(BASE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(produto)
-            });
-            listarTodos();
-        }
+async function editar(id) {
+  const res = await fetch(`${API}/${id}`);
+  if (!res.ok) { alert('Erro ao buscar animal'); return; }
 
-       async function atualizar() {
-           const id = document.getElementById('id').value;
-           if (!id) {
-               alert("Informe o ID do produto para atualizar!");
-               return;
-           }
+  const a = await res.json();
 
-           const produto = getProdutoFromForm();
+  document.getElementById('animalId').value = a.id;
+  document.getElementById('nome').value = a.nome;
+  document.getElementById('idade').value = a.idade ?? '';
+  document.getElementById('adocao').value = a.adocao;
+  document.getElementById('chip').value = a.chip ?? '';
 
-           try {
-               const response = await fetch(`${BASE_URL}/${id}`, {
-                   method: 'PUT',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify(produto)
-               });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-               if (!response.ok) {
-                   const errorText = await response.text();
-                   throw new Error(`Erro ao atualizar (${response.status}): ${errorText}`);
-               }
+async function remover(id) {
+  if (!confirm('Confirma exclusão?')) return;
 
-               listarTodos();
-           } catch (error) {
-               console.error("Erro na atualização:", error);
-               alert("Falha ao atualizar o produto.");
-           }
-       }
+  const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
 
+  if (res.status === 204) {
+    listar();
+  } else {
+    alert('Erro ao excluir');
+  }
+}
 
-        async function deletar() {
-            const id = document.getElementById('id').value;
-            await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' });
-            listarTodos();
-        }
+document.getElementById('animalForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
 
-        function consultar() {
-            const id = document.getElementById('id').value;
+  const id = document.getElementById('animalId').value;
+  const payload = {
+    nome: document.getElementById('nome').value,
+    idade: document.getElementById('idade').value ? parseInt(document.getElementById('idade').value) : null,
+    adocao: document.getElementById('adocao').value === 'true',
+    chip: document.getElementById('chip').value || null
+  };
 
-            fetch(`${BASE_URL}/${id}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erro ao buscar o produto: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(produto => {
-                    document.getElementById('nome').value = produto.nome || '';
-                    document.getElementById('preco').value = produto.preco || '';
-                    document.getElementById('quantidade').value = produto.quantidade || '';
-                    document.getElementById('status').value = produto.status || '';
-                })
-                .catch(error => {
-                    console.error('Erro ao consultar produto:', error);
-                    alert('Produto não encontrado!');
-                });
-        }
+  if (!payload.nome) {
+    alert('Nome é obrigatório');
+    return;
+  }
 
-        function limparCampos() {
-            document.getElementById('id').value = '';
-            document.getElementById('nome').value = '';
-            document.getElementById('preco').value = '';
-            document.getElementById('quantidade').value = '';
-            document.getElementById('status').value = '';
-        }
+  if (id) {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-        document.addEventListener('DOMContentLoaded', listarTodos);
+    if (res.ok) { limpar(); listar(); }
+    else { alert('Erro ao atualizar'); }
+
+  } else {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) { limpar(); listar(); }
+    else { alert('Erro ao salvar'); }
+  }
+});
+
+document.getElementById('limpar').addEventListener('click', limpar);
+
+function limpar() {
+  document.getElementById('animalId').value = '';
+  document.getElementById('nome').value = '';
+  document.getElementById('idade').value = '';
+  document.getElementById('adocao').value = 'true';
+  document.getElementById('chip').value = '';
+}
+
+// inicial
+listar();
